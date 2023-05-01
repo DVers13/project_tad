@@ -1,7 +1,7 @@
 import pickle
 
 import pandas as pd
-from sklearn.metrics import r2_score, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error, r2_score
 import numpy as np
 import streamlit as st
 import tensorflow as tf
@@ -89,23 +89,48 @@ def main():
         st.write("Выберите страницу слева")
         request = st.selectbox(
             "Выберите запрос",
-            ["Метрики", "Первые 5 предсказанных значений"]
+            ["Метрики", "Первые n предсказанных значений"]
         )
 
         if request == "Метрики":
             st.header("R^2")
             rt = r2_score(model.predict(test_data), y_data)
             st.write(f"{rt}")
+
             st.header("MAE")
             mae = mean_absolute_error(model.predict(test_data), y_data)
             st.write(f"{mae}")
-        elif request == "Первые 5 предсказанных значений":
-            st.header("Первые 5 предсказанных значений")
-            first_5_test = test_data.iloc[:5, :]
-            first_5_pred = model.predict(first_5_test)
-            for item in first_5_pred:
-                item = float(item)
-                st.write(round(item))
+
+            st.header("MSE")
+            mse = mean_squared_error(model.predict(test_data), y_data)
+            st.write(f"{mse}")
+
+            st.header("RMSE")
+            rmse = np.sqrt(mean_squared_error(model.predict(test_data), y_data))
+            st.write(f"{rmse}")
+
+            st.header("MAPE")
+            mape = mean_absolute_percentage_error(model.predict(test_data), y_data)
+            st.write(f"{mape}")
+
+        elif request == "Первые n предсказанных значений":
+            n = st.text_input("Введите кольчество значений", "")
+            n = int(n)
+            if n > test_data.shape[0]:
+                st.write("Вы ввели слишком большое значение, выведены первые 5!")
+                st.header("Первые 5 предсказанных значений")
+                first_5_test = test_data.iloc[:5, :]
+                first_5_pred = model.predict(first_5_test)
+                for item in first_5_pred:
+                    item = float(item)
+                    st.write(round(item))
+            else:
+                st.header(f"Первые {n} предсказанных значений")
+                first_n_test = test_data.iloc[:n, :]
+                first_n_pred = model.predict(first_n_test)
+                for item in first_n_pred:
+                    item = float(item)
+                    st.write(round(item))
 
 
 @st.cache_data
