@@ -4,6 +4,8 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error, r2_score
 import numpy as np
 import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
 import tensorflow as tf
 
 def main():
@@ -13,7 +15,7 @@ def main():
     
     page = st.sidebar.selectbox(
         "Выберите страницу",
-        ["Описание задачи и данных", "Запрос к модели"]
+        ["Описание задачи и данных", "Запрос к модели", "Графики"]
     )
 
     if page == "Описание задачи и данных":
@@ -131,7 +133,29 @@ def main():
                 for item in first_n_pred:
                     item = float(item)
                     st.write(round(item))
-
+    elif page == "Графики":
+        st.title("Графики")
+        data_cars = load_test_data("data/cars.csv")
+        column_all = []
+        mas = ["odometer_value",
+             "year_produced",
+             "engine_capacity",
+             "price_usd",
+             "number_of_photos",
+             "up_counter",
+             "duration_listed"
+             ]
+        column_1 = st.selectbox("Выберите признак 1", mas)
+        mas_2 = mas.copy()
+        mas_2.remove(column_1)
+        column_all.append(column_1)
+        column_2 = st.selectbox(
+            "Выберите признак 2",
+            mas_2
+        )
+        column_all.append(column_2)
+        if column_all:
+            st.pyplot(sns.pairplot(data_cars[column_all].sample(n=1000, random_state=42)))
 
 @st.cache_data
 def load_test_data(path_to_file):
@@ -141,3 +165,5 @@ def load_test_data(path_to_file):
 
 if __name__ == '__main__':
     main()
+
+#графики
